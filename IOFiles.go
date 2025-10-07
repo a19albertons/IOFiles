@@ -22,11 +22,24 @@ func main() {
 		return
 	}
 
-	// I check the read functions worked well
-	for i := 0; i < len(products); i++ {
-		println(products[i].Categoria+" "+products[i].ID+" "+products[i].Nombre+" "+strconv.FormatFloat(products[i].Precio, 'f', 2, 64)+" "+strconv.Itoa(products[i].Stock))
-		println(transactions[i].Tipo+" "+transactions[i].IDProducto+" "+strconv.Itoa(transactions[i].Cantidad)+" "+transactions[i].Fecha)
+	// Update products
+	salida := procesarTransacciones(products,transactions)
+	for i  := range salida {
+		println(salida[i])
 	}
+
+	// Update the log
+	err := escribirLog(salida, "log.txt")
+	if err != nil {
+		println("Ha habido algun error al actualizar el log")
+		println(err)
+	}
+
+	// Write new inventory
+	escribirInventario(products, "inventario_actualizado.txt")
+
+	// Generate a report with low stock products
+	generarReporteBajoStock(products, 10)
 }
 
 
@@ -117,14 +130,84 @@ func leerTransacciones(nombreArchivo string) ([]Transaccion, error) {
 	return arrayTransaction, nil
 }
 func procesarTransacciones(productos []Producto, transacciones []Transaccion) []string {
-	return nil
+	var resultados []string
+
+	// Consider transaction as a parent
+	for i := 0; i < len(transacciones); i++ {
+		transacion := transacciones[i]
+
+		// Consider productos as a child
+		for j := 0; j < len(productos); j++ {
+			// First condition the ID exist (the same ID)
+			if productos[j].ID == transacion.IDProducto {
+				// Check the stock, in addition I have to controlate the case when is COMPRA or DEVOLUCION
+				if (transacion.Tipo == "VENTA" && productos[j].Stock >= transacion.Cantidad) ||
+				transacion.Tipo == "COMPRA" || transacion.Tipo == "DEVOLUCION" {
+					if transacion.Tipo == "VENTA" && productos[j].Stock >= transacion.Cantidad {
+						productos[i].Stock = productos[i].Stock - transacion.Cantidad
+					} else {
+						productos[i].Stock = productos[i].Stock + transacion.Cantidad
+					}
+				} else {
+					// Error for the log when you don't have enough stock
+					resultados = append(resultados, "there isn't sufficient stock")
+				}
+				break
+			} else {
+				if j+1==len(productos) {
+					// Error for the log when the ID isn't equals
+				resultados = append(resultados, "Product doesn't exist: This doesn't change anything")
+				}
+			}
+		}
+	}
+
+	return resultados
 }
 func escribirInventario(productos []Producto, nombreArchivo string) error {
-	return nil
+	
+
+	// Add the first line and concat all array
+	contenido := "ID,Nombre,Categoría,Precio,Stock\n"
+	for i := 0; i < len(productos); i++ {
+		contenido+=productos[i].ID+","+productos[i].Nombre+","+productos[i].Categoria+","+strconv.FormatFloat(productos[i].Precio, 'f', 2, 64)+","+strconv.Itoa(productos[i].Stock)+"\n"
+	}
+	// I write the file
+	err := os.WriteFile(nombreArchivo, []byte(contenido), 0644)
+	return err
 }
 func generarReporteBajoStock(productos []Producto, limite int) error {
-	return nil
+	fichero, err := os.OpenFile("productos_bajo_stock.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer fichero.Close()
+
+	contenido := "ALERTA: PRODUCTOS CON BAJO STOCK\n================================\n\n"
+	contador := 0
+	for i := 0; i < len(productos); i++ {
+		if productos[i].Stock < limite {
+			contenido+=productos[i].ID+" | "+productos[i].Nombre+" | Stock actual: "+strconv.Itoa(productos[i].Stock)+" unidades\n"
+			contador++
+		}
+	}
+	contenido += "\nTotal productos con bajo stock: "+strconv.Itoa(contador)+"\n"
+	_, err = fichero.WriteString(contenido)
+	return err
 }
 func escribirLog(errores []string, nombreArchivo string) error {
-	return nil
+	// Concat the string to add the file
+	contenido := ""
+	for i := 0; i < len(errores); i++ {
+		contenido+=errores[i]
+	}
+
+	// Open the file and control the success
+	fichero, err := os.OpenFile(nombreArchivo, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil
+	}
+	defer fichero.Close()
+	_, err  = fichero.WriteString(contenido)
+	return err 
 }
