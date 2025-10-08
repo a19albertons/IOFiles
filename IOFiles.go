@@ -150,13 +150,15 @@ func procesarTransacciones(productos []Producto, transacciones []Transaccion) []
 					}
 				} else {
 					// Error for the log when you don't have enough stock
-					resultados = append(resultados, "there isn't sufficient stock")
+					ts := time.Now().Format("2006-01-02 15:04:05")
+					resultados = append(resultados, "["+ts+"] Error: Stock insufficient for sale of product "+transacion.IDProducto+" not found in transaction of type "+transacion.Tipo)
 				}
 				break
 			} else {
 				if j+1==len(productos) {
 					// Error for the log when the ID isn't equals
-				resultados = append(resultados, "Product doesn't exist: This doesn't change anything")
+					ts := time.Now().Format("2006-01-02 15:04:05")
+					resultados = append(resultados, "["+ts+"] Error: Product "+transacion.IDProducto+" not found in transaction of type "+transacion.Tipo)
 				}
 			}
 		}
