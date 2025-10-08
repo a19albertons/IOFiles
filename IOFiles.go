@@ -153,7 +153,7 @@ func procesarTransacciones(productos []Producto, transacciones []Transaccion) []
 					// Error for the log when you don't have enough stock
 					ts := time.Now().Format("2006-01-02 15:04:05")
 					resultados = append(resultados, "["+ts+"] Error: Stock insufficient for sale of product "+transacion.IDProducto+" not found in transaction of type "+transacion.Tipo)
-					resultados = append(resultados, "actual: "+strconv.Itoa(productos[j].Stock)+", Cantidad solicitada: "+strconv.Itoa(transacion.Cantidad))
+					resultados = append(resultados, "actual: "+strconv.Itoa(productos[j].Stock)+", Quantity of request: "+strconv.Itoa(transacion.Cantidad))
 				}
 				break
 			} else {
@@ -189,19 +189,19 @@ func generarReporteBajoStock(productos []Producto, limite int) error {
 	defer fichero.Close()
 
 	// First line of the report
-	contenido := "ALERTA: PRODUCTOS CON BAJO STOCK\n================================\n\n"
+	contenido := "ALERT: PRODUCTS WITH LOW STOCK\n================================\n\n"
 
 	// Count all alerts
 	contador := 0
 	for i := 0; i < len(productos); i++ {
 		if productos[i].Stock < limite {
-			contenido+=productos[i].ID+" | "+productos[i].Nombre+" | Stock actual: "+strconv.Itoa(productos[i].Stock)+" unidades\n"
+			contenido+=productos[i].ID+" | "+productos[i].Nombre+" | Actual stock: "+strconv.Itoa(productos[i].Stock)+" units\n"
 			contador++
 		}
 	}
 
 	// Add Final line with the total of products with low stock
-	contenido += "\nTotal productos con bajo stock: "+strconv.Itoa(contador)+"\n"
+	contenido += "\nTotal products with low stock: "+strconv.Itoa(contador)+"\n"
 	_, err = fichero.WriteString(contenido)
 	return err
 }
