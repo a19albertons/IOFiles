@@ -4,6 +4,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -152,6 +153,7 @@ func procesarTransacciones(productos []Producto, transacciones []Transaccion) []
 					// Error for the log when you don't have enough stock
 					ts := time.Now().Format("2006-01-02 15:04:05")
 					resultados = append(resultados, "["+ts+"] Error: Stock insufficient for sale of product "+transacion.IDProducto+" not found in transaction of type "+transacion.Tipo)
+					resultados = append(resultados, "actual: "+strconv.Itoa(productos[j].Stock)+", Cantidad solicitada: "+strconv.Itoa(transacion.Cantidad))
 				}
 				break
 			} else {
@@ -179,13 +181,17 @@ func escribirInventario(productos []Producto, nombreArchivo string) error {
 	return err
 }
 func generarReporteBajoStock(productos []Producto, limite int) error {
+	//  We open the file and control the success
 	fichero, err := os.OpenFile("productos_bajo_stock.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
 	defer fichero.Close()
 
+	// First line of the report
 	contenido := "ALERTA: PRODUCTOS CON BAJO STOCK\n================================\n\n"
+
+	// Count all alerts
 	contador := 0
 	for i := 0; i < len(productos); i++ {
 		if productos[i].Stock < limite {
@@ -193,6 +199,8 @@ func generarReporteBajoStock(productos []Producto, limite int) error {
 			contador++
 		}
 	}
+
+	// Add Final line with the total of products with low stock
 	contenido += "\nTotal productos con bajo stock: "+strconv.Itoa(contador)+"\n"
 	_, err = fichero.WriteString(contenido)
 	return err
