@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -218,6 +219,8 @@ func escribirLog(errores []string, nombreArchivo string) error {
 		return nil
 	}
 	defer fichero.Close()
-	_, err  = fichero.WriteString(contenido)
+
+	log.SetOutput(fichero)
+	log.Println(contenido)
 	return err 
 }
