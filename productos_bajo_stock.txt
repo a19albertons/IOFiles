@@ -1,20 +1,5 @@
-ALERTA: PRODUCTOS CON BAJO STOCK
+ALERT: PRODUCTS WITH LOW STOCK
 ================================
 
 
-Total productos con bajo stock: 0
-ALERTA: PRODUCTOS CON BAJO STOCK
-================================
-
-
-Total productos con bajo stock: 0
-ALERTA: PRODUCTOS CON BAJO STOCK
-================================
-
-
-Total productos con bajo stock: 0
-ALERTA: PRODUCTOS CON BAJO STOCK
-================================
-
-
-Total productos con bajo stock: 0
+Total products with low stock: 0

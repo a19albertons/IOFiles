@@ -29,8 +29,8 @@ func main() {
 		println(salida[i])
 	}
 
-	// Update the log
-	err := escribirLog(salida, "log.txt")
+	// Update errores.log
+	err := escribirLog(salida, "errores.log")
 	if err != nil {
 		println("Ha habido algun error al actualizar el log")
 		println(err)
@@ -182,7 +182,7 @@ func escribirInventario(productos []Producto, nombreArchivo string) error {
 }
 func generarReporteBajoStock(productos []Producto, limite int) error {
 	//  We open the file and control the success
-	fichero, err := os.OpenFile("productos_bajo_stock.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	fichero, err := os.OpenFile("productos_bajo_stock.txt", os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func escribirLog(errores []string, nombreArchivo string) error {
 	// Concat the string to add the file
 	contenido := ""
 	for i := 0; i < len(errores); i++ {
-		contenido+=errores[i]
+		contenido+=errores[i]+"\n"
 	}
 
 	// Open the file and control the success
